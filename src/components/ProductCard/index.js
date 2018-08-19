@@ -1,4 +1,5 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
+import { get } from "lodash";
 import { Link } from "react-router-dom";
 import { string, number, arrayOf, object } from "prop-types";
 
@@ -10,12 +11,38 @@ import {
   CardPrice,
   CardInfo,
   CardLink,
-  BrandName
+  BrandName,
+  CardVariant
 } from "./style";
 
-class ProductCard extends PureComponent {
+import VariantCard from "./VariantCard";
+
+class ProductCard extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      variantID: get(props, ".variant[0].id") || 0,
+      imageUrl: get(props, ".variant[0].imageUrl") || props.imageUrl,
+      variantName: get(props, ".variant[0].name") || ""
+    };
+  }
+
+  changeVariant = variantID => {
+    if (this.state.variantID !== variantID) {
+      const selected = this.props.variant.filter(item => item.id === variantID);
+      if (selected.length > 0) {
+        this.setState({
+          variantID: selected[0].id || 0,
+          imageUrl: selected[0].imageUrl || "",
+          variantName: selected[0].name || ""
+        });
+      }
+    }
+  };
+
   render() {
-    const { imageUrl, brand, name, price, slug } = this.props;
+    const { brand, name, price, slug, variant } = this.props;
+    const { variantID, imageUrl, variantName } = this.state;
 
     return (
       <CardContainer>
@@ -33,11 +60,28 @@ class ProductCard extends PureComponent {
             className={CardLink}
             to={`/p/${slug}`}
           >
-            <CardName>{name}</CardName>
+            <CardName>{`${name} ${variantName}`}</CardName>
             <BrandName>{brand}</BrandName>
           </Link>
           <CardPrice>{`$ ${price}`}</CardPrice>
         </CardInfo>
+        {variant.length > 0 && (
+          <CardVariant>
+            <ul>
+              {variant.map((item, index) => (
+                <li key={`variantItem-${index}`}>
+                  <VariantCard
+                    activeID={variantID}
+                    changeVariant={this.changeVariant}
+                    id={item.id}
+                    active={item.active}
+                    color={item.color}
+                  />
+                </li>
+              ))}
+            </ul>
+          </CardVariant>
+        )}
       </CardContainer>
     );
   }

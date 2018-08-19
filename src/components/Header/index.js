@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { debounce } from "lodash";
+import { withRouter } from "react-router";
+import { Link } from "react-router-dom";
+import { object } from "prop-types";
 
 import { getSearchProduct } from "../../modules/Search";
 import { HeaderWrapper, Logo, SearchBox, SearchSubBox } from "./style";
@@ -14,13 +17,11 @@ class Header extends Component {
     };
   }
 
-  // static getDerivedStateFromProps(props, state) {
-  //   if (state.searchWord !== props.query) {
-  //     return {
-  //       searchWord: props.query
-  //     };
-  //   }
-  // }
+  static propTypes = {
+    match: object.isRequired,
+    location: object.isRequired,
+    history: object.isRequired
+  };
 
   changeWord = e => {
     this.setState(
@@ -35,13 +36,16 @@ class Header extends Component {
 
   debounceSearchQuery = debounce(searchWord => {
     this.props.getSearchProduct(searchWord, 1, true);
+    // this.context.history.push("/");
   }, 500);
 
   render() {
     const { searchWord } = this.state;
     return (
       <HeaderWrapper>
-        <Logo src={logoImage} />
+        <Link to="/">
+          <Logo src={logoImage} />
+        </Link>
         <SearchBox>
           <SearchSubBox>
             <input
@@ -61,7 +65,9 @@ const mapStateToProps = ({ search }) => ({
   query: search.query
 });
 
-export default connect(
-  mapStateToProps,
-  { getSearchProduct }
-)(Header);
+export default withRouter(
+  connect(
+    mapStateToProps,
+    { getSearchProduct }
+  )(Header)
+);

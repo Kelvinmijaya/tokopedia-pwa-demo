@@ -21,9 +21,10 @@ class SearchView extends Component {
   };
 
   componentDidMount() {
-    const { query, getSearchProduct } = this.props;
-
-    getSearchProduct(query, 1);
+    const { query, getSearchProduct, data } = this.props;
+    if (data.length === 0) {
+      getSearchProduct(query, 1);
+    }
   }
 
   fetchMore = () => {
@@ -35,7 +36,7 @@ class SearchView extends Component {
 
   render() {
     const { data, loading, pagination, error } = this.props;
-
+    
     if (loading && data.length === 0) {
       return (
         <ProductWrap>
