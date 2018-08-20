@@ -22,10 +22,11 @@ import {
 class ProductView extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       slug: null,
       variantID: 0,
-      imageUrl: "",
+      imageUrl: get(props, "data.imageUrl") || "",
       variantName: ""
     };
   }
@@ -34,13 +35,12 @@ class ProductView extends Component {
     // check if this different product from before
     const slug = get(props, "match.params.slug") || "";
     if (slug !== state.slug) {
-      props.getProductFromSearch(slug);
       return {
         slug,
         variantID: 0,
         imageUrl: "",
         variantName: ""
-      }
+      };
     }
 
     // check if variant exist
@@ -55,7 +55,7 @@ class ProductView extends Component {
           get(props, "data.variant[0].imageUrl") || get(props, "data.imageUrl"),
         variantName: get(props, "data.variant[0].name") || ""
       };
-    } else if (!props.loading && state.imageUrl === "") {
+    } else if (!props.loading && state.variantID === 0) {
       return {
         imageUrl: get(props, "data.imageUrl")
       };
@@ -77,10 +77,27 @@ class ProductView extends Component {
   static defaultProps = {
     data: null
   };
-  
+
+  componentDidMount() {
+    const { match, getProductFromSearch } = this.props;
+    const slug = get(match, "params.slug") || "";
+
+    if (slug !== "") {
+      getProductFromSearch(slug);
+      this.setState({
+        slug,
+        variantID: 0,
+        imageUrl: "",
+        variantName: ""
+      });
+    }
+  }
+
   changeVariant = variantID => {
     if (this.state.variantID !== variantID) {
-      const selected = this.props.data.variant.filter(item => item.id === variantID);
+      const selected = this.props.data.variant.filter(
+        item => item.id === variantID
+      );
       if (selected.length > 0) {
         this.setState({
           variantID: selected[0].id || 0,
@@ -93,6 +110,7 @@ class ProductView extends Component {
 
   render() {
     const { loading, data, error } = this.props;
+    const { variantID, imageUrl, variantName } = this.state;
 
     if (loading && !data) {
       return (
@@ -111,7 +129,6 @@ class ProductView extends Component {
     }
 
     const { brand, name, price, variant } = data;
-    const { variantID, imageUrl, variantName } = this.state;
 
     return (
       <ProductDetailWrap>

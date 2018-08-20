@@ -36,7 +36,7 @@ class Header extends Component {
 
   debounceSearchQuery = debounce(searchWord => {
     this.props.getSearchProduct(searchWord, 1, true);
-    // this.context.history.push("/");
+    this.props.history.push("/");
   }, 500);
 
   render() {
